@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -13,7 +13,6 @@ import { useClimaViewModel } from '../viewmodels/ClimaViewModel';
 export default function TelaPrincipal() {
   const [cidadePesquisa, setCidadePesquisa] = useState('');
   
-
   const { 
     clima, 
     carregando, 
@@ -23,16 +22,20 @@ export default function TelaPrincipal() {
     buscarPorLocalizacao 
   } = useClimaViewModel();
 
-
-  const lidarComBusca = () => {
+  
+  useEffect(() => {
     if (cidadePesquisa.trim() === '') return;
-    buscarCidade(cidadePesquisa);
-    setCidadePesquisa(''); 
-  };
+
+    const temporizador = setTimeout(() => {
+      buscarCidade(cidadePesquisa);
+    }, 1500); 
+
+
+    return () => clearTimeout(temporizador);
+  }, [cidadePesquisa]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-
       <Text style={styles.tituloApp}>Agro-Clima</Text>
 
 
@@ -42,8 +45,7 @@ export default function TelaPrincipal() {
           placeholder="Cidade, País (ex: Paris, FR ou Paris, US)"
           placeholderTextColor="#888"
           value={cidadePesquisa}
-          onChangeText={setCidadePesquisa}
-          onSubmitEditing={lidarComBusca} 
+          onChangeText={setCidadePesquisa} 
         />
       </View>
 
@@ -56,7 +58,7 @@ export default function TelaPrincipal() {
         <Text style={styles.textoBotaoGps}>📍 Usar Localização do Celular</Text>
       </TouchableOpacity>
 
-  
+
       {historico.length > 0 && (
         <View style={styles.containerHistorico}>
           <Text style={styles.tituloHistorico}>Pesquisas Recentes:</Text>
@@ -65,7 +67,7 @@ export default function TelaPrincipal() {
               <TouchableOpacity 
                 key={index} 
                 style={styles.tag}
-                onPress={() => buscarCidade(item)} 
+                onPress={() => buscarCidade(item)}
               >
                 <Text style={styles.textoTag}>{item}</Text>
               </TouchableOpacity>
@@ -87,15 +89,11 @@ export default function TelaPrincipal() {
 
       {clima && !carregando && (
         <View style={styles.cartaoClima}>
-   
           <Text style={styles.nomeCidade}>{clima.cidade}</Text>
-          
-
           <Text style={styles.temperatura}>{clima.temperatura}°C</Text>
           
           <View style={styles.divisor} />
 
-      
           <View style={styles.detalhesContainer}>
             <Text style={styles.textoDetalhe}>Sensação: {clima.sensacaoTermica}°C</Text>
             <Text style={styles.textoDetalhe}>Umidade: {clima.umidade}%</Text>
