@@ -26,6 +26,9 @@
     "jest-expo": "~51.0.0",
     "react-test-renderer": "18.2.0"
   },
+  "engines": {
+    "node": "18.x"
+  },
   "private": true,
   "jest": {
     "preset": "jest-expo"
