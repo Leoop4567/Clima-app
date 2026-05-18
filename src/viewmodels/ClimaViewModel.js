@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Platform } from 'react-native';
+import { Platform } from 'react-native'; 
 import * as Location from 'expo-location'; 
 import { apiClima } from '../services/api';
 import { Clima } from '../models/Clima';
@@ -97,18 +97,19 @@ export function useClimaViewModel() {
           await buscarPorCoordenadas(latitude, longitude, null);
         },
         (erroNavegador) => {
-
           if (erroNavegador.code === 1) {
             setErro("Permissão de localização negada no navegador.");
           } else if (erroNavegador.code === 2) {
-            setErro("O sistema não conseguiu obter a localização do seu dispositivo.");
+            setErro("O dispositivo não conseguiu obter uma posição de GPS estável.");
+          } else if (erroNavegador.code === 3) {
+            setErro("Tempo limite esgotado. Tente novamente em um local aberto.");
           } else {
             setErro("Não foi possível obter a localização na Web.");
           }
           setCarregando(false);
         },
-       
-        { enableHighAccuracy: false, timeout: 10000 } 
+
+        { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 } 
       );
       return;
     }
@@ -125,7 +126,7 @@ export function useClimaViewModel() {
       const { latitude, longitude } = localizacao.coords;
       await buscarPorCoordenadas(latitude, longitude, null);
     } catch (err) {
-      setErro("Não foi possível obter o sinal do GPS.");
+      setErro("Não foi possível obter o sinal do GPS nativo.");
     } finally {
       setCarregando(false);
     }
