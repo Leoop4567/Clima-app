@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Platform } from 'react-native';
 import * as Location from 'expo-location'; 
 import { apiClima } from '../services/api';
 import { Clima } from '../models/Clima';
@@ -8,7 +9,7 @@ export function useClimaViewModel() {
   const [clima, setClima] = useState(null);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState(null);
-  const [historico, setHistorico] = useState([]); 
+  const [historico, setHistorico] = useState([]);
 
   useEffect(() => {
     async function iniciar() {
@@ -16,7 +17,6 @@ export function useClimaViewModel() {
         await GerenciadorBanco.configurarBanco();
         await atualizarListaHistorico();
         
-
         const listaAtual = await GerenciadorBanco.buscarHistorico();
         if (listaAtual.length > 0) {
           await buscarCidade(listaAtual[0]);
@@ -71,7 +71,7 @@ export function useClimaViewModel() {
       
       const nomeFinal = nomeParaSalvar || novoClima.cidade;
       await GerenciadorBanco.salvarCidade(nomeFinal);
-      await atualizarListaHistorico(); 
+      await atualizarListaHistorico();
     } catch (err) {
       setErro("Erro ao obter dados meteorológicos.");
     } finally {
@@ -79,9 +79,33 @@ export function useClimaViewModel() {
     }
   };
 
+
   const buscarPorLocalizacao = async () => {
     setCarregando(true);
     setErro(null);
+
+
+    if (Platform.OS === 'web') {
+      if (!navigator.geolocation) {
+        setErro("Geolocalização não suportada neste navegador.");
+        setCarregando(false);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (posicao) => {
+          const { latitude, longitude } = posicao.coords;
+          await buscarPorCoordenadas(latitude, longitude, null);
+        },
+        (erroNavegador) => {
+          setErro("Permissão de localização negada pelo navegador.");
+          setCarregando(false);
+        }
+      );
+      return; 
+    }
+
+  
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
