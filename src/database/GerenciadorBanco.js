@@ -1,63 +1,71 @@
-import { Platform } from 'react-native'; 
-import * as SQLite from 'expo-sqlite';
+import { Platform } from 'react-native';
+
+let banco = null;
 
 
-const banco = Platform.OS !== 'web' ? SQLite.openDatabaseSync('clima.db') : null;
+if (Platform.OS !== 'web') {
+  try {
+    const SQLite = require('expo-sqlite');
+    banco = SQLite.openDatabaseSync('clima.db');
+  } catch (e) {
+    console.error("Erro ao inicializar o SQLite nativo:", e);
+  }
+}
 
 export const GerenciadorBanco = {
   configurarBanco: async () => {
+    if (Platform.OS === 'web') {
 
-    if (Platform.OS === 'web') return;
+      return true;
+    }
     
-    await banco.execAsync(`
-      CREATE TABLE IF NOT EXISTS historico_busca (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome_cidade TEXT NOT NULL UNIQUE
-      );
-    `);
+    if (banco) {
+      await banco.execAsync(`
+        CREATE TABLE IF NOT EXISTS historico (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          cidade TEXT UNIQUE
+        );
+      `);
+    }
   },
 
-  salvarCidade: async (nome) => {
+  salvarCidade: async (nomeCidade) => {
+    if (!nomeCidade) return;
 
     if (Platform.OS === 'web') {
-      try {
-        let historico = JSON.parse(localStorage.getItem('historico_busca') || '[]');
-        historico = historico.filter(cidade => cidade !== nome); 
-        historico.unshift(nome); 
-        historico = historico.slice(0, 4); 
-        localStorage.setItem('historico_busca', JSON.stringify(historico));
-      } catch (e) {
-        console.error("Erro no localStorage da Web:", e);
-      }
+
+      let historico = JSON.parse(localStorage.getItem('historico') || '[]');
+      historico = historico.filter(c => c !== nomeCidade);
+      historico.unshift(nomeCidade);
+      if (historico.length > 4) historico.pop();
+      localStorage.setItem('historico', JSON.stringify(historico));
       return;
     }
 
-l
-    try {
-      await banco.runAsync('DELETE FROM historico_busca WHERE nome_cidade = ?', [nome]);
-      await banco.runAsync('INSERT INTO historico_busca (nome_cidade) VALUES (?)', [nome]);
+    if (banco) {
+
+      await banco.runAsync('DELETE FROM historico WHERE cidade = ?;', [nomeCidade]);
+      await banco.runAsync('INSERT INTO historico (cidade) VALUES (?);', [nomeCidade]);
+      
+
       await banco.runAsync(`
-        DELETE FROM historico_busca WHERE id NOT IN (
-          SELECT id FROM historico_busca ORDER BY id DESC LIMIT 4
-        )
+        DELETE FROM historico WHERE id NOT IN (
+          SELECT id FROM historico ORDER BY id DESC LIMIT 4
+        );
       `);
-    } catch (error) {
-      console.error("Erro ao salvar histórico no SQLite:", error);
     }
   },
 
   buscarHistorico: async () => {
-
     if (Platform.OS === 'web') {
-      try {
-        return JSON.parse(localStorage.getItem('historico_busca') || '[]');
-      } catch (e) {
-        return [];
-      }
+      return JSON.parse(localStorage.getItem('historico') || '[]');
     }
 
- 
-    const resultados = await banco.getAllAsync('SELECT nome_cidade FROM historico_busca ORDER BY id DESC');
-    return resultados.map(row => row.nome_cidade);
+    if (banco) {
+      const resultados = await banco.getAllAsync('SELECT cidade FROM historico ORDER BY id DESC LIMIT 4;');
+      return resultados.map(row => row.cidade);
+    }
+    
+    return [];
   }
 };
