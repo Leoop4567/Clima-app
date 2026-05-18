@@ -1,16 +1,24 @@
 const fs = require('fs');
 const path = require('path');
 
-// Caminho do arquivo interno do Expo que está sem a extensão .js
-const arquivo = path.join(__dirname, 'node_modules', 'expo-sqlite', 'build', 'index.js');
+const baseDir = path.join(__dirname, 'node_modules', 'expo-sqlite');
 
-if (fs.existsSync(arquivo)) {
-  let conteudo = fs.readFileSync(arquivo, 'utf8');
-  
-  // Se encontrar a importação incompleta, injeta o .js nela
-  if (conteudo.includes("./SQLiteDatabase") && !conteudo.includes("./SQLiteDatabase.js")) {
-    conteudo = conteudo.replace("./SQLiteDatabase", "./SQLiteDatabase.js");
-    fs.writeFileSync(arquivo, conteudo, 'utf8');
-    console.log("Bug de importação do expo-sqlite corrigido com sucesso para o Node 20!");
+if (fs.existsSync(baseDir)) {
+  // 1. Garante que a pasta build existe
+  const buildDir = path.join(baseDir, 'build');
+  if (!fs.existsSync(buildDir)) {
+    fs.mkdirSync(buildDir, { recursive: true });
   }
+
+  // 2. Neutraliza o index.js e o SQLiteDatabase.js transformando-os em objetos vazios
+  fs.writeFileSync(path.join(buildDir, 'index.js'), 'module.exports = {};', 'utf8');
+  fs.writeFileSync(path.join(buildDir, 'SQLiteDatabase.js'), 'module.exports = {};', 'utf8');
+
+  // 3. Neutraliza o arquivo de manifesto que força o link de plugins nativos de celular
+  const configJson = path.join(baseDir, 'expo-module.config.json');
+  if (fs.existsSync(configJson)) {
+    fs.writeFileSync(configJson, '{}', 'utf8');
+  }
+
+  console.log(" [Vercel Patch] Módulo expo-sqlite neutralizado com sucesso para build Web!");
 }
