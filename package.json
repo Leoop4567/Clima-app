@@ -8,7 +8,6 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest",
-    "postinstall": "node corrigir-sqlite.js",
     "build": "expo export --platform web"
   },
   "dependencies": {
@@ -28,7 +27,7 @@
     "react-test-renderer": "18.2.0"
   },
   "engines": {
-    "node": "24.x"
+    "node": "20.x"
   },
   "private": true,
   "jest": {
