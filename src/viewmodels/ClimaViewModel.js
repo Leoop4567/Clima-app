@@ -84,7 +84,6 @@ export function useClimaViewModel() {
     setCarregando(true);
     setErro(null);
 
-
     if (Platform.OS === 'web') {
       if (!navigator.geolocation) {
         setErro("Geolocalização não suportada neste navegador.");
@@ -98,14 +97,22 @@ export function useClimaViewModel() {
           await buscarPorCoordenadas(latitude, longitude, null);
         },
         (erroNavegador) => {
-          setErro("Permissão de localização negada pelo navegador.");
+
+          if (erroNavegador.code === 1) {
+            setErro("Permissão de localização negada no navegador.");
+          } else if (erroNavegador.code === 2) {
+            setErro("O sistema não conseguiu obter a localização do seu dispositivo.");
+          } else {
+            setErro("Não foi possível obter a localização na Web.");
+          }
           setCarregando(false);
-        }
+        },
+       
+        { enableHighAccuracy: false, timeout: 10000 } 
       );
-      return; 
+      return;
     }
 
-  
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
