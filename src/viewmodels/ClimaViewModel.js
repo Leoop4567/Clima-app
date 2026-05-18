@@ -67,10 +67,17 @@ export function useClimaViewModel() {
       });
 
       const novoClima = new Clima(respostaClima.data, nomeParaSalvar);
+      
+
+      const siglaPais = respostaClima.data.sys?.country;
+      if (siglaPais && novoClima.cidade && !novoClima.cidade.includes(siglaPais)) {
+        novoClima.cidade = `${novoClima.cidade}, ${siglaPais}`;
+      }
+
       setClima(novoClima);
       
-      const nomeFinal = nomeParaSalvar || novoClima.cidade;
-      await GerenciadorBanco.salvarCidade(nomeFinal);
+  
+      await GerenciadorBanco.salvarCidade(novoClima.cidade);
       await atualizarListaHistorico();
     } catch (err) {
       setErro("Erro ao obter dados meteorológicos.");
@@ -78,7 +85,6 @@ export function useClimaViewModel() {
       setCarregando(false);
     }
   };
-
 
   const buscarPorLocalizacao = async () => {
     setCarregando(true);
@@ -104,11 +110,10 @@ export function useClimaViewModel() {
           } else if (erroNavegador.code === 3) {
             setErro("Tempo limite esgotado. Tente novamente em um local aberto.");
           } else {
-            setErro("Não foi possível obter a localização na Web.");
+            setErro("Não foi possível obter la localização na Web.");
           }
           setCarregando(false);
         },
-
         { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 } 
       );
       return;
