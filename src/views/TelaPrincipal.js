@@ -1,251 +1,332 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  View, 
+  StyleSheet, 
   Text, 
+  View, 
   TextInput, 
   TouchableOpacity, 
-  ActivityIndicator, 
-  StyleSheet, 
-  ScrollView 
+  ScrollView, 
+  ActivityIndicator,
+  Platform
 } from 'react-native';
-import { useClimaViewModel } from '../viewmodels/ClimaViewModel';
+import { GerenciadorBanco } from '../database/GerenciadorBanco';
 
 export default function TelaPrincipal() {
-  const [cidadePesquisa, setCidadePesquisa] = useState('');
-  
-  const { 
-    clima, 
-    carregando, 
-    erro, 
-    historico, 
-    buscarCidade, 
-    buscarPorLocalizacao 
-  } = useClimaViewModel();
+  const [cidade, setCidade] = useState('');
+  const [clima, setClima] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [historico, setHistorico] = useState([]);
+  const [erro, setErro] = useState('');
 
-  
   useEffect(() => {
-    if (cidadePesquisa.trim() === '') return;
+    carregarHistorico();
+  }, []);
 
-    const temporizador = setTimeout(() => {
-      buscarCidade(cidadePesquisa);
-    }, 1500); 
+  const carregarHistorico = async () => {
+    const dados = await GerenciadorBanco.buscarHistorico();
+    setHistorico(dados);
+  };
 
 
-    return () => clearTimeout(temporizador);
-  }, [cidadePesquisa]);
+  const buscarClima = async (nomeCidade) => {
+    if (!nomeCidade.trim()) return;
+    setLoading(true);
+    setErro('');
+    try {
+
+      setTimeout(async () => {
+        setClima({
+          cidade: nomeCidade,
+          temp: 16,
+          sensacao: 15,
+          umidade: 53,
+          descricao: 'Nublado'
+        });
+        await GerenciadorBanco.salvarCidade(nomeCidade);
+        carregarHistorico();
+        setLoading(false);
+      }, 600);
+    } catch (e) {
+      setErro('Erro ao buscar dados.');
+      setLoading(false);
+    }
+  };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.tituloApp}>Agro-Clima</Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      
 
+      <Text style={styles.tituloPrincipal}>Agro-Clima</Text>
 
-      <View style={styles.containerBusca}>
-        <TextInput
-          style={styles.input}
-          placeholder="Cidade, País (ex: Paris, FR ou Paris, US)"
-          placeholderTextColor="#888"
-          value={cidadePesquisa}
-          onChangeText={setCidadePesquisa} 
-        />
+  
+      <TextInput
+        style={styles.inputPesquisa}
+        placeholder="Cidade, País (ex: Paris, FR ou Paris, US)"
+        placeholderTextColor="#94A3B8"
+        value={cidade}
+        onChangeText={setCidade}
+        onSubmitEditing={() => buscarClima(cidade)}
+      />
+
+      <View style={styles.linhasPlantacaoContainer}>
+        <View style={styles.linhaCampo} />
+        <View style={[styles.linhaCampo, { width: '80%', alignSelf: 'center' }]} />
+        <View style={[styles.linhaCampo, { width: '60%', alignSelf: 'center' }]} />
       </View>
 
 
-      <TouchableOpacity 
-        style={styles.botaoGps} 
-        onPress={buscarPorLocalizacao}
-        disabled={carregando}
-      >
-        <Text style={styles.textoBotaoGps}>📍 Usar Localização do Celular</Text>
+      {clima && (
+        <View style={styles.cardClima}>
+          <Text style={styles.cidadeClima}>{clima.cidade}</Text>
+          
+  
+          <View style={styles.boxTemperatura}>
+            <Text style={styles.nuvemIcon}>☁️</Text>
+            <Text style={styles.temperaturaClima}>{clima.temp}°C</Text>
+          </View>
+
+          <View style={styles.containerStatus}>
+            <Text style={styles.ventoIcon}>💨</Text>
+            <Text style={styles.statusClima}>{clima.descricao}</Text>
+          </View>
+
+          <View style={styles.linhaDivisoria} />
+
+          <View style={styles.containerDetalhes}>
+            <Text style={styles.textoDetalhe}>Sensação: {clima.sensacao}°C</Text>
+            <Text style={styles.textoDetalhe}>Umidade: {clima.umidade}%</Text>
+          </View>
+
+      
+          <TouchableOpacity style={styles.botaoMenuFlutuante}>
+            <Text style={styles.textoMenuFlutuante}>☰</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {loading && <ActivityIndicator size="large" color="#2E7D32" style={{ marginVertical: 20 }} />}
+      {erro ? <Text style={styles.textoErro}>{erro}</Text> : null}
+
+  
+      <TouchableOpacity style={styles.botaoLocalizacao} onPress={() => buscarClima('Sua Localização')}>
+        <Text style={styles.iconeBotao}>☀️ </Text>
+        <Text style={styles.textoBotaoLocalizacao}>Usar Minha Localização</Text>
       </TouchableOpacity>
 
 
-      {historico.length > 0 && (
-        <View style={styles.containerHistorico}>
-          <Text style={styles.tituloHistorico}>Pesquisas Recentes:</Text>
-          <View style={styles.listaTags}>
-            {historico.map((item, index) => (
-              <TouchableOpacity 
-                key={index} 
-                style={styles.tag}
-                onPress={() => buscarCidade(item)}
-              >
-                <Text style={styles.textoTag}>{item}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+      <View style={styles.containerHistorico}>
+        <Text style={styles.tituloSecao}>Pesquisas Recentes:</Text>
+        <View style={styles.listaTags}>
+          {historico.map((item, index) => (
+            <TouchableOpacity 
+              key={index} 
+              style={styles.tagHistorico}
+              onPress={() => buscarClima(item)}
+            >
+              <Text style={styles.textoTag}>🌱 {item}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
-      )}
+      </View>
 
-
-      {carregando && (
-        <ActivityIndicator size="large" color="#4CAF50" style={styles.loader} />
-      )}
-
-
-      {erro && !carregando && (
-        <Text style={styles.textoErro}>{erro}</Text>
-      )}
-
-
-      {clima && !carregando && (
-        <View style={styles.cartaoClima}>
-          <Text style={styles.nomeCidade}>{clima.cidade}</Text>
-          <Text style={styles.temperatura}>{clima.temperatura}°C</Text>
-          
-          <View style={styles.divisor} />
-
-          <View style={styles.detalhesContainer}>
-            <Text style={styles.textoDetalhe}>Sensação: {clima.sensacaoTermica}°C</Text>
-            <Text style={styles.textoDetalhe}>Umidade: {clima.umidade}%</Text>
-            <Text style={styles.statusClima}>{clima.descricao}</Text>
-          </View>
-        </View>
-      )}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    backgroundColor: '#f5f5f5',
-    alignItems: 'center',
+    flex: 1,
+    backgroundColor: '#EEF5ED', 
+  },
+  contentContainer: {
+    paddingHorizontal: 22,
     paddingTop: 40,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 30,
   },
-  tituloApp: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#2e7d32',
-    marginBottom: 20,
+  tituloPrincipal: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#2E5A27',
     textAlign: 'center',
+    marginBottom: 24,
+    letterSpacing: 0.5,
   },
-  containerBusca: {
-    width: '100%',
-    maxWidth: 600,
-    marginBottom: 15,
-  },
-  input: {
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 8,
+  inputPesquisa: {
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#CBD5E1',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 56,
     fontSize: 16,
-    color: '#333',
+    color: '#334155',
+    marginBottom: 10,
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
   },
-  botaoGps: {
-    backgroundColor: '#e64a19',
-    paddingVertical: 10,
+ 
+  linhasPlantacaoContainer: {
+    marginVertical: 12,
+    gap: 4,
+    opacity: 0.3,
+  },
+  linhaCampo: {
+    height: 2,
+    backgroundColor: '#81C784',
+    width: '100%',
+  },
+
+  cardClima: {
+    backgroundColor: Platform.OS === 'web' ? 'rgba(255, 255, 255, 0.75)' : '#FFFFFF',
+    borderRadius: 24,
+    paddingTop: 35,
+    paddingBottom: 25,
     paddingHorizontal: 20,
-    borderRadius: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
+    alignItems: 'center',
+    position: 'relative',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    elevation: 8,
+    shadowColor: '#1E293B',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    marginBottom: 24,
+  },
+  cidadeClima: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#1E293B',
+    letterSpacing: 0.3,
+  },
+  boxTemperatura: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 5,
+    position: 'relative',
+  },
+  nuvemIcon: {
+    fontSize: 64,
+    position: 'absolute',
+    opacity: 0.25,
+    left: -45,
+    top: 10,
+  },
+  temperaturaClima: {
+    fontSize: 76,
+    fontWeight: '300', 
+    color: '#1D4ED8',
+  },
+  containerStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: -5,
+  },
+  ventoIcon: {
+    fontSize: 18,
+    opacity: 0.6,
+  },
+  statusClima: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#475569',
+  },
+  linhaDivisoria: {
+    width: '85%',
+    height: 1,
+    backgroundColor: '#E2E8F0',
+    marginVertical: 18,
+  },
+  containerDetalhes: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 6,
+  },
+  textoDetalhe: {
+    fontSize: 16,
+    color: '#475569',
+    fontWeight: '500',
+  },
+  botaoMenuFlutuante: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    backgroundColor: '#E2E8F0',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    alignItems: 'center',
+    justifyContent: 'center',
     elevation: 2,
   },
-  textoBotaoGps: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: 'bold',
-    textAlign: 'center',
+  textoMenuFlutuante: {
+    fontSize: 20,
+    color: '#334155',
+  },
+
+  botaoLocalizacao: {
+    backgroundColor: '#D97706',
+    borderRadius: 25,
+    height: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    alignSelf: 'center',
+    marginBottom: 28,
+    elevation: 4,
+    shadowColor: '#D97706',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+  },
+  iconeBotao: {
+    fontSize: 18,
+    color: '#FFFFFF',
+  },
+  textoBotaoLocalizacao: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
   },
   containerHistorico: {
     width: '100%',
-    maxWidth: 600,
-    marginBottom: 20,
-    alignItems: 'flex-start',
   },
-  tituloHistorico: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '600',
-    marginBottom: 8,
+  tituloSecao: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#475569',
+    marginBottom: 12,
   },
   listaTags: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 10,
   },
-  tag: {
-    backgroundColor: '#d0dbe5',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
+
+  tagHistorico: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#A7F3D0', 
+    elevation: 1,
   },
   textoTag: {
-    color: '#2c3e50',
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  loader: {
-    marginTop: 30,
+    color: '#15803D',
+    fontSize: 14,
+    fontWeight: '600',
   },
   textoErro: {
-    color: '#d32f2f',
-    fontSize: 14,
+    color: '#DC2626',
     textAlign: 'center',
-    marginTop: 10,
-    marginBottom: 10,
-    fontWeight: '500',
-    paddingHorizontal: 10,
-  },
-  cartaoClima: {
-    width: '100%',
-    maxWidth: 600,
-    backgroundColor: '#ffffff',
-    borderRadius: 15,
-    padding: 25,
-    alignItems: 'center',
-    marginTop: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  nomeCidade: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  temperatura: {
-    fontSize: 54,
-    fontWeight: '300',
-    color: '#1976d2',
-    marginVertical: 5,
-  },
-  divisor: {
-    width: '80%',
-    height: 1,
-    backgroundColor: '#eee',
-    marginVertical: 15,
-  },
-  detalhesContainer: {
-    alignItems: 'center',
-    width: '100%',
-  },
-  textoDetalhe: {
-    fontSize: 15,
-    color: '#555',
-    marginBottom: 5,
-  },
-  statusClima: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 10,
-    textTransform: 'capitalize',
-  },
+    marginVertical: 10,
+    fontWeight: '600',
+  }
 });
