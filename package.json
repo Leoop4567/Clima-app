@@ -7,7 +7,6 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "postinstall": "node -e \"const fs = require('fs'); const p = 'node_modules/expo-sqlite/build/index.js'; if (fs.existsSync(p)) fs.writeFileSync(p, 'const pl = (c) => c; pl.openDatabaseSync = () => null; module.exports = pl;', 'utf8');\"",
     "build": "expo export --platform web"
   },
   "dependencies": {
@@ -15,8 +14,9 @@
     "axios": "^1.6.0",
     "expo": "~51.0.0",
     "expo-location": "~17.0.1",
-    "expo-status-bar": "~1.12.1",
     "expo-sqlite": "~14.0.3",
+    "expo-status-bar": "~1.12.1",
+    "install": "^0.13.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.74.1",
