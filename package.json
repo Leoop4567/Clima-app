@@ -11,13 +11,16 @@
     "build": "expo export --platform web"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~3.2.3",
     "axios": "^1.6.0",
     "expo": "~51.0.0",
     "expo-location": "~17.0.1",
     "expo-status-bar": "~1.12.1",
     "expo-sqlite": "~14.0.3",
     "react": "18.2.0",
-    "react-native": "0.74.1"
+    "react-dom": "18.2.0",
+    "react-native": "0.74.1",
+    "react-native-web": "~0.19.10"
   },
   "engines": {
     "node": "20.x"
