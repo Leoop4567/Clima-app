@@ -7,7 +7,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "postinstall": "node -e \"const fs = require('fs'); const p = 'node_modules/expo-sqlite/expo-module.config.json'; if (fs.existsSync(p)) fs.unlinkSync(p);\"",
+    "postinstall": "node -e \"const fs = require('fs'); const p = 'node_modules/expo-sqlite/build/index.js'; if (fs.existsSync(p)) { let c = fs.readFileSync(p, 'utf8'); if (c.includes('./SQLiteDatabase') && !c.includes('./SQLiteDatabase.js')) fs.writeFileSync(p, c.replace('./SQLiteDatabase', './SQLiteDatabase.js'), 'utf8'); }\"",
     "build": "expo export --platform web"
   },
   "dependencies": {
