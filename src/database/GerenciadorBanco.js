@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import * as SQLite from 'expo-sqlite';
 
+
 const banco = Platform.OS !== 'web' ? SQLite.openDatabaseSync('clima.db') : null;
 
 export const GerenciadorBanco = {
@@ -16,8 +17,10 @@ export const GerenciadorBanco = {
       `);
     }
   },
+
   salvarCidade: async (nomeCidade) => {
     if (!nomeCidade) return;
+
     if (Platform.OS === 'web') {
 
       let historico = JSON.parse(localStorage.getItem('historico') || '[]');

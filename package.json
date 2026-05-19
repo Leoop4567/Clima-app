@@ -7,9 +7,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "jest",
-    "postinstall": "node corrigir-sqlite.js",
-    "build": "NODE_OPTIONS= expo export --platform web"
+    "postinstall": "node -e \"const fs = require('fs'); const p = 'node_modules/expo-sqlite/expo-module.config.json'; if (fs.existsSync(p)) fs.unlinkSync(p);\"",
+    "build": "expo export --platform web"
   },
   "dependencies": {
     "axios": "^1.6.0",
@@ -20,18 +19,8 @@
     "react": "18.2.0",
     "react-native": "0.74.1"
   },
-  "devDependencies": {
-    "@babel/core": "^7.20.0",
-    "@testing-library/react-native": "^12.5.0",
-    "jest": "^29.2.1",
-    "jest-expo": "~51.0.0",
-    "react-test-renderer": "18.2.0"
-  },
   "engines": {
     "node": "20.x"
   },
-  "private": true,
-  "jest": {
-    "preset": "jest-expo"
-  }
+  "private": true
 }
