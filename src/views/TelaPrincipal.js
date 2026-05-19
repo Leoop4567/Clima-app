@@ -1,165 +1,149 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  StyleSheet, 
-  Text, 
   View, 
+  Text, 
   TextInput, 
   TouchableOpacity, 
-  ScrollView, 
-  ActivityIndicator,
-  Platform
+  ActivityIndicator, 
+  StyleSheet, 
+  ScrollView 
 } from 'react-native';
-import { GerenciadorBanco } from '../database/GerenciadorBanco';
+import { useClimaViewModel } from '../viewmodels/ClimaViewModel';
 
 export default function TelaPrincipal() {
-  const [cidade, setCidade] = useState('');
-  const [clima, setClima] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [historico, setHistorico] = useState([]);
-  const [erro, setErro] = useState('');
+  const [cidadePesquisa, setCidadePesquisa] = useState('');
+  
+  const { 
+    clima, 
+    carregando, 
+    erro, 
+    historico, 
+    buscarCidade, 
+    buscarPorLocalizacao 
+  } = useClimaViewModel();
 
   useEffect(() => {
-    carregarHistorico();
-  }, []);
+    if (cidadePesquisa.trim() === '') return;
 
-  const carregarHistorico = async () => {
-    const dados = await GerenciadorBanco.buscarHistorico();
-    setHistorico(dados);
-  };
+    const temporizador = setTimeout(() => {
+      buscarCidade(cidadePesquisa);
+    }, 1500); 
 
-
-  const buscarClima = async (nomeCidade) => {
-    if (!nomeCidade.trim()) return;
-    setLoading(true);
-    setErro('');
-    try {
-
-      setTimeout(async () => {
-        setClima({
-          cidade: nomeCidade,
-          temp: 16,
-          sensacao: 15,
-          umidade: 53,
-          descricao: 'Nublado'
-        });
-        await GerenciadorBanco.salvarCidade(nomeCidade);
-        carregarHistorico();
-        setLoading(false);
-      }, 600);
-    } catch (e) {
-      setErro('Erro ao buscar dados.');
-      setLoading(false);
-    }
-  };
+    return () => clearTimeout(temporizador);
+  }, [cidadePesquisa]);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      
+    <ScrollView contentContainerStyle={styles.container}>
+      {/* Cabeçalho Temático Agro */}
+      <Text style={styles.tituloApp}>Agro-Clima</Text>
 
-      <Text style={styles.tituloPrincipal}>Agro-Clima</Text>
+      {/* Input de Pesquisa com Cantos Arredondados */}
+      <View style={styles.containerBusca}>
+        <TextInput
+          style={styles.input}
+          placeholder="Cidade, País (ex: Paris, FR ou Paris, US)"
+          placeholderTextColor="#94A3B8"
+          value={cidadePesquisa}
+          onChangeText={setCidadePesquisa} 
+        />
+      </View>
 
-  
-      <TextInput
-        style={styles.inputPesquisa}
-        placeholder="Cidade, País (ex: Paris, FR ou Paris, US)"
-        placeholderTextColor="#94A3B8"
-        value={cidade}
-        onChangeText={setCidade}
-        onSubmitEditing={() => buscarClima(cidade)}
-      />
-
+      {/* Linhas Simbólicas de Cultivo ao Fundo */}
       <View style={styles.linhasPlantacaoContainer}>
         <View style={styles.linhaCampo} />
         <View style={[styles.linhaCampo, { width: '80%', alignSelf: 'center' }]} />
-        <View style={[styles.linhaCampo, { width: '60%', alignSelf: 'center' }]} />
       </View>
 
-
-      {clima && (
-        <View style={styles.cardClima}>
-          <Text style={styles.cidadeClima}>{clima.cidade}</Text>
+      {/* Card Principal de Clima (Visual Glassmorphism da imagem) */}
+      {clima && !carregando && (
+        <View style={styles.cartaoClima}>
+          <Text style={styles.nomeCidade}>{clima.cidade}</Text>
           
-  
           <View style={styles.boxTemperatura}>
             <Text style={styles.nuvemIcon}>☁️</Text>
-            <Text style={styles.temperaturaClima}>{clima.temp}°C</Text>
+            <Text style={styles.temperatura}>{clima.temperatura}°C</Text>
           </View>
-
+          
           <View style={styles.containerStatus}>
-            <Text style={styles.ventoIcon}>💨</Text>
-            <Text style={styles.statusClima}>{clima.descricao}</Text>
+            <Text style={styles.statusClima}>☁️ {clima.descricao}</Text>
           </View>
+          
+          <View style={styles.divisor} />
 
-          <View style={styles.linhaDivisoria} />
-
-          <View style={styles.containerDetalhes}>
-            <Text style={styles.textoDetalhe}>Sensação: {clima.sensacao}°C</Text>
+          <View style={styles.detalhesContainer}>
+            <Text style={styles.textoDetalhe}>Sensação: {clima.sensacaoTermica}°C</Text>
             <Text style={styles.textoDetalhe}>Umidade: {clima.umidade}%</Text>
           </View>
 
-      
+          {/* Botão Hambúrguer na Lateral do Card */}
           <TouchableOpacity style={styles.botaoMenuFlutuante}>
             <Text style={styles.textoMenuFlutuante}>☰</Text>
           </TouchableOpacity>
         </View>
       )}
 
-      {loading && <ActivityIndicator size="large" color="#2E7D32" style={{ marginVertical: 20 }} />}
-      {erro ? <Text style={styles.textoErro}>{erro}</Text> : null}
+      {carregando && (
+        <ActivityIndicator size="large" color="#2E5A27" style={styles.loader} />
+      )}
 
-  
-      <TouchableOpacity style={styles.botaoLocalizacao} onPress={() => buscarClima('Sua Localização')}>
-        <Text style={styles.iconeBotao}>☀️ </Text>
-        <Text style={styles.textoBotaoLocalizacao}>Usar Minha Localização</Text>
+      {erro && !carregando && (
+        <Text style={styles.textoErro}>{erro}</Text>
+      )}
+
+      {/* Botão de Localização Estilizado sem o texto "do campo" */}
+      <TouchableOpacity 
+        style={styles.botaoGps} 
+        onPress={buscarPorLocalizacao}
+        disabled={carregando}
+      >
+        <Text style={styles.textoBotaoGps}>☀️ Usar Minha Localização</Text>
       </TouchableOpacity>
 
-
-      <View style={styles.containerHistorico}>
-        <Text style={styles.tituloSecao}>Pesquisas Recentes:</Text>
-        <View style={styles.listaTags}>
-          {historico.map((item, index) => (
-            <TouchableOpacity 
-              key={index} 
-              style={styles.tagHistorico}
-              onPress={() => buscarClima(item)}
-            >
-              <Text style={styles.textoTag}>🌱 {item}</Text>
-            </TouchableOpacity>
-          ))}
+      {/* Histórico de Pesquisas Estilizado com Folhas */}
+      {historico.length > 0 && (
+        <View style={styles.containerHistorico}>
+          <Text style={styles.tituloHistorico}>Pesquisas Recentes:</Text>
+          <View style={styles.listaTags}>
+            {historico.map((item, index) => (
+              <TouchableOpacity 
+                key={index} 
+                style={styles.tag}
+                onPress={() => buscarCidade(item)}
+              >
+                <Text style={styles.textoTag}>🌱 {item}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
-      </View>
-
+      )}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#EEF5ED', 
-  },
-  contentContainer: {
     paddingHorizontal: 22,
     paddingTop: 40,
     paddingBottom: 30,
+    backgroundColor: '#EEF5ED', // Fundo verde-claro orgânico pastel da imagem
+    minHeight: '100%'
   },
-  tituloPrincipal: {
+  tituloApp: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#2E5A27',
+    color: '#2E5A27', // Verde escuro agro
     textAlign: 'center',
     marginBottom: 24,
     letterSpacing: 0.5,
   },
-  inputPesquisa: {
+  containerBusca: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#CBD5E1',
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 56,
-    fontSize: 16,
-    color: '#334155',
+    justifyContent: 'center',
     marginBottom: 10,
     elevation: 2,
     shadowColor: '#000',
@@ -167,7 +151,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 3,
   },
- 
+  input: {
+    fontSize: 16,
+    color: '#334155',
+  },
   linhasPlantacaoContainer: {
     marginVertical: 12,
     gap: 4,
@@ -178,17 +165,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#81C784',
     width: '100%',
   },
-
-  cardClima: {
-    backgroundColor: Platform.OS === 'web' ? 'rgba(255, 255, 255, 0.75)' : '#FFFFFF',
+  cartaoClima: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     paddingTop: 35,
     paddingBottom: 25,
     paddingHorizontal: 20,
     alignItems: 'center',
     position: 'relative',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
     elevation: 8,
     shadowColor: '#1E293B',
     shadowOffset: { width: 0, height: 6 },
@@ -196,11 +180,10 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     marginBottom: 24,
   },
-  cidadeClima: {
+  nomeCidade: {
     fontSize: 26,
     fontWeight: '700',
     color: '#1E293B',
-    letterSpacing: 0.3,
   },
   boxTemperatura: {
     flexDirection: 'row',
@@ -216,33 +199,29 @@ const styles = StyleSheet.create({
     left: -45,
     top: 10,
   },
-  temperaturaClima: {
+  temperatura: {
     fontSize: 76,
-    fontWeight: '300', 
-    color: '#1D4ED8',
+    fontWeight: '300',
+    color: '#1D4ED8', // Azul clima destacado
   },
   containerStatus: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
     marginTop: -5,
-  },
-  ventoIcon: {
-    fontSize: 18,
-    opacity: 0.6,
   },
   statusClima: {
     fontSize: 20,
     fontWeight: '600',
     color: '#475569',
+    textTransform: 'capitalize',
   },
-  linhaDivisoria: {
+  divisor: {
     width: '85%',
     height: 1,
     backgroundColor: '#E2E8F0',
     marginVertical: 18,
   },
-  containerDetalhes: {
+  detalhesContainer: {
     width: '100%',
     alignItems: 'center',
     gap: 6,
@@ -268,9 +247,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#334155',
   },
-
-  botaoLocalizacao: {
-    backgroundColor: '#D97706',
+  botaoGps: {
+    backgroundColor: '#D97706', // O dourado/mostarda da imagem
     borderRadius: 25,
     height: 52,
     flexDirection: 'row',
@@ -285,11 +263,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
   },
-  iconeBotao: {
-    fontSize: 18,
-    color: '#FFFFFF',
-  },
-  textoBotaoLocalizacao: {
+  textoBotaoGps: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
@@ -297,7 +271,7 @@ const styles = StyleSheet.create({
   containerHistorico: {
     width: '100%',
   },
-  tituloSecao: {
+  tituloHistorico: {
     fontSize: 15,
     fontWeight: '700',
     color: '#475569',
@@ -308,20 +282,22 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 10,
   },
-
-  tagHistorico: {
+  tag: {
     backgroundColor: '#FFFFFF',
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#A7F3D0', 
+    borderColor: '#A7F3D0', // Bordinha verde-menta
     elevation: 1,
   },
   textoTag: {
     color: '#15803D',
     fontSize: 14,
     fontWeight: '600',
+  },
+  loader: {
+    marginVertical: 20,
   },
   textoErro: {
     color: '#DC2626',
