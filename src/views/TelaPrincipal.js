@@ -106,108 +106,146 @@ export default function TelaPrincipal() {
 }
 
 const styles = StyleSheet.create({
-
   container: {
-    flex: 1,
-    backgroundColor: '#EAF2F8',
-    padding: 20,
-  },
-  
-
-  cardClima: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
+    flexGrow: 1,
+    backgroundColor: '#f5f5f5',
     alignItems: 'center',
+    paddingTop: 40,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  tituloApp: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#2e7d32',
     marginBottom: 20,
-  
-    elevation: 4,
+    textAlign: 'center',
+  },
+  containerBusca: {
+    width: '100%',
+    maxWidth: 600,
+    marginBottom: 15,
+  },
+  input: {
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    fontSize: 16,
+    color: '#333',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  botaoGps: {
+    backgroundColor: '#e64a19',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
+  },
+  textoBotaoGps: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  containerHistorico: {
+    width: '100%',
+    maxWidth: 600,
+    marginBottom: 20,
+    alignItems: 'flex-start',
+  },
+  tituloHistorico: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  listaTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  tag: {
+    backgroundColor: '#d0dbe5',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+  },
+  textoTag: {
+    color: '#2c3e50',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  loader: {
+    marginTop: 30,
+  },
+  textoErro: {
+    color: '#d32f2f',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+    fontWeight: '500',
+    paddingHorizontal: 10,
+  },
+  cartaoClima: {
+    width: '100%',
+    maxWidth: 600,
+    backgroundColor: '#ffffff',
+    borderRadius: 15,
+    padding: 25,
+    alignItems: 'center',
+    marginTop: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  
   nomeCidade: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#2C3E50',
-    marginBottom: 8,
+    color: '#2c3e50',
+    marginBottom: 10,
+    textAlign: 'center',
   },
-  
   temperatura: {
     fontSize: 54,
     fontWeight: '300',
-    color: '#1A5276',
+    color: '#1976d2',
+    marginVertical: 5,
   },
-  
-  statusClima: {
-    fontSize: 18,
-    color: '#546E7A',
-    textTransform: 'capitalize',
-    marginTop: 5,
+  divisor: {
+    width: '80%',
+    height: 1,
+    backgroundColor: '#eee',
+    marginVertical: 15,
   },
-
-  
-  containerPesquisa: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+  detalhesContainer: {
     alignItems: 'center',
-    paddingHorizontal: 15,
-    marginBottom: 25,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    width: '100%',
   },
-  
-  input: {
-    flex: 1,
-    height: 50,
-    fontSize: 16,
-    color: '#333',
-  },
-  
-  botaoPesquisar: {
-    backgroundColor: '#27AE60', 
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-  },
-  
-  textoBotao: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-
-  
-  tituloSecao: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#34495E',
-    marginBottom: 12,
-    letterSpacing: 0.5,
-  },
-  
-  itemHistorico: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 14,
-    paddingHorizontal: 18,
-    borderRadius: 10,
-    marginBottom: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderLeftWidth: 4,
-    borderLeftColor: '#27AE60', 
-  },
-  
-  textoHistorico: {
+  textoDetalhe: {
     fontSize: 15,
-    color: '#2C3E50',
-    fontWeight: '500',
-  }
+    color: '#555',
+    marginBottom: 5,
+  },
+  statusClima: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 10,
+    textTransform: 'capitalize',
+  },
 });
