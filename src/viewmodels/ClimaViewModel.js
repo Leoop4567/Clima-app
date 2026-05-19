@@ -5,6 +5,21 @@ import { apiClima } from '../services/api';
 import { Clima } from '../models/Clima';
 import { GerenciadorBanco } from '../database/GerenciadorBanco';
 
+const dicionarioPaises = {
+  "BR": "Brasil",
+  "US": "Estados Unidos",
+  "IT": "Itália",
+  "FR": "França",
+  "PT": "Portugal",
+  "ES": "Espanha",
+  "AR": "Argentina",
+  "NO": "Noruega",
+  "CR": "Costa Rica",
+  "GB": "Reino Unido",
+  "DE": "Alemanha",
+  "JP": "Japão"
+};
+
 export function useClimaViewModel() {
   const [clima, setClima] = useState(null);
   const [carregando, setCarregando] = useState(false);
@@ -68,15 +83,23 @@ export function useClimaViewModel() {
 
       const novoClima = new Clima(respostaClima.data, nomeParaSalvar);
       
-
       const siglaPais = respostaClima.data.sys?.country;
-      if (siglaPais && novoClima.cidade && !novoClima.cidade.includes(siglaPais)) {
-        novoClima.cidade = `${novoClima.cidade}, ${siglaPais}`;
+      
+      if (siglaPais && novoClima.cidade) {
+        
+        const paisTraduzido = dicionarioPaises[siglaPais] || siglaPais; 
+
+     
+        if (novoClima.cidade.includes(`, ${siglaPais}`)) {
+          novoClima.cidade = novoClima.cidade.replace(`, ${siglaPais}`, `, ${paisTraduzido}`);
+        } 
+        else if (!novoClima.cidade.includes(paisTraduzido)) {
+          novoClima.cidade = `${novoClima.cidade}, ${paisTraduzido}`;
+        }
       }
 
       setClima(novoClima);
       
-  
       await GerenciadorBanco.salvarCidade(novoClima.cidade);
       await atualizarListaHistorico();
     } catch (err) {
@@ -110,7 +133,7 @@ export function useClimaViewModel() {
           } else if (erroNavegador.code === 3) {
             setErro("Tempo limite esgotado. Tente novamente em um local aberto.");
           } else {
-            setErro("Não foi possível obter la localização na Web.");
+            setErro("Não foi possível obter a localização na Web.");
           }
           setCarregando(false);
         },

@@ -51,7 +51,7 @@ export default function TelaPrincipal() {
         onPress={buscarPorLocalizacao}
         disabled={carregando}
       >
-        <Text style={styles.textoBotaoGps}>📍 Usar Localização do Celular</Text>
+        <Text style={styles.textoBotaoGps}>Usar Localização do Celular</Text>
       </TouchableOpacity>
 
       {historico.length > 0 && (
@@ -100,32 +100,33 @@ export default function TelaPrincipal() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#F3F7F0',
+    backgroundColor: '#F3F7F0', 
     alignItems: 'center',
-    paddingTop: 50,
+    paddingTop: 40, // Diminuído para colar mais no topo
     paddingHorizontal: 20,
-    paddingBottom: 30,
+    paddingBottom: 20,
+    justifyContent: 'center', // Ajuda a centralizar se sobrar espaço
   },
   tituloApp: {
-    fontSize: 32,
+    fontSize: 28, // Levemente menor
     fontWeight: '900',
-    color: '#2C5E1A',
-    marginBottom: 24,
+    color: '#2C5E1A', 
+    marginBottom: 16, // Margem reduzida
     textAlign: 'center',
     letterSpacing: -0.5,
   },
   containerBusca: {
     width: '100%',
     maxWidth: 600,
-    marginBottom: 15,
+    marginBottom: 12, // Margem reduzida
   },
   input: {
     backgroundColor: '#ffffff',
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12, // Altura do input menor
+    borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: '#D4E2D4',
+    borderColor: '#D4E2D4', 
     fontSize: 16,
     color: '#2C3E50',
     shadowColor: '#2C5E1A',
@@ -135,11 +136,13 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   botaoGps: {
-    backgroundColor: '#E67E22',
-    paddingVertical: 14,
+    backgroundColor: '#E67E22', 
+    paddingVertical: 12, // Botão ligeiramente mais fino
     paddingHorizontal: 24,
-    borderRadius: 20,
-    marginBottom: 25,
+    borderRadius: 16,
+    marginBottom: 16, // Margem reduzida
+    width: '100%',
+    maxWidth: 600,
     shadowColor: '#E67E22',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
@@ -156,41 +159,41 @@ const styles = StyleSheet.create({
   containerHistorico: {
     width: '100%',
     maxWidth: 600,
-    marginBottom: 25,
+    marginBottom: 16, // Margem reduzida
     alignItems: 'flex-start',
   },
   tituloHistorico: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#7F8C8D', 
     fontWeight: '700',
-    marginBottom: 12,
+    marginBottom: 10,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   listaTags: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 8,
   },
   tag: {
     backgroundColor: '#E8F5E9', 
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: '#C8E6C9', 
   },
   textoTag: {
     color: '#2E7D32', 
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
   },
   loader: {
-    marginTop: 30,
+    marginTop: 20,
   },
   textoErro: {
     color: '#E74C3C',
-    fontSize: 15,
+    fontSize: 14,
     textAlign: 'center',
     marginTop: 10,
     marginBottom: 10,
@@ -201,54 +204,54 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 600,
     backgroundColor: '#ffffff',
-    borderRadius: 24, 
-    paddingVertical: 35,
-    paddingHorizontal: 25,
+    borderRadius: 20, 
+    paddingVertical: 24, // Reduzido o espaço interno do cartão
+    paddingHorizontal: 20,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 5,
     shadowColor: '#2C5E1A',
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 6,
+    shadowRadius: 12,
+    elevation: 5,
     borderWidth: 1,
     borderColor: '#E8F5E9',
   },
   nomeCidade: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '800',
     color: '#2C3E50',
-    marginBottom: 8,
+    marginBottom: 4,
     textAlign: 'center',
   },
   temperatura: {
-    fontSize: 72, 
+    fontSize: 60, // Encolhido de 72 para caber melhor
     fontWeight: '300',
     color: '#2980B9', 
-    marginVertical: 10,
+    marginVertical: 4,
   },
   divisor: {
     width: '60%',
     height: 2,
     backgroundColor: '#F0F3F4',
-    marginVertical: 20,
+    marginVertical: 12, // Reduzido
     borderRadius: 2,
   },
   detalhesContainer: {
     alignItems: 'center',
     width: '100%',
-    gap: 6, 
+    gap: 4, 
   },
   textoDetalhe: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#7F8C8D',
     fontWeight: '500',
   },
   statusClima: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
     color: '#2C5E1A', 
-    marginTop: 8,
+    marginTop: 6,
     textTransform: 'capitalize',
   },
 });
